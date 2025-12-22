@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MAA SHAKTI TRADING CO. - Bill Generator</title>
+    <!-- Libraries for PDF/Image generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    
     <style>
         * {
             margin: 0;
@@ -113,6 +118,7 @@
             font-size: 16px;
             font-weight: bold;
             transition: all 0.3s;
+            margin: 5px;
         }
         
         .btn-primary {
@@ -127,11 +133,19 @@
         .btn-secondary {
             background-color: #e91e63;
             color: white;
-            margin-left: 10px;
         }
         
         .btn-secondary:hover {
             background-color: #c2185b;
+        }
+        
+        .btn-whatsapp {
+            background-color: #075E54;
+            color: white;
+        }
+        
+        .btn-whatsapp:hover {
+            background-color: #054d44;
         }
         
         .btn-add {
@@ -150,12 +164,23 @@
         
         .actions {
             display: flex;
+            flex-wrap: wrap;
             justify-content: center;
-            gap: 20px;
+            gap: 15px;
             margin-top: 30px;
             padding: 20px;
             background-color: #f9f9f9;
             border-top: 1px solid #ddd;
+        }
+        
+        .whatsapp-options {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f0f9ff;
+            border-radius: 8px;
         }
         
         /* Bill Styling (Matches the pink bill image) */
@@ -269,6 +294,37 @@
             font-size: 18px;
         }
         
+        /* Loading overlay */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 24px;
+        }
+        
+        .loading-spinner {
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #25D366;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
         @media print {
             body * {
                 visibility: hidden;
@@ -286,6 +342,13 @@
     </style>
 </head>
 <body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div style="text-align: center;">
+            <div class="loading-spinner"></div>
+            <div>Generating PDF/Image...</div>
+        </div>
+    </div>
+    
     <div class="container">
         <header>
             <h1>MAA SHAKTI TRADING CO.</h1>
@@ -335,13 +398,6 @@
                     </thead>
                     <tbody id="itemsTable">
                         <!-- Items will be added here dynamically -->
-                        <tr>
-                            <td><input type="text" class="item-desc" placeholder="Item description"></td>
-                            <td><input type="text" class="item-hsn" placeholder="HSN Code"></td>
-                            <td><input type="number" class="item-qty" placeholder="Qty" min="1"></td>
-                            <td><input type="number" class="item-rate" placeholder="Rate" min="0" step="0.01"></td>
-                            <td><button type="button" class="btn-remove" onclick="removeItem(this)">Remove</button></td>
-                        </tr>
                     </tbody>
                 </table>
                 
@@ -371,12 +427,28 @@
         <div class="actions">
             <button type="button" class="btn btn-primary" onclick="generateBill()">Generate Bill</button>
             <button type="button" class="btn btn-secondary" onclick="printBill()">Print Bill</button>
-            <button type="button" class="btn btn-primary" onclick="sendWhatsApp()">Send via WhatsApp</button>
+            <button type="button" class="btn btn-secondary" onclick="downloadPDF()">Download PDF</button>
+            <button type="button" class="btn btn-secondary" onclick="downloadImage()">Download Image</button>
             <button type="button" class="btn btn-secondary" onclick="clearForm()">Clear Form</button>
+        </div>
+        
+        <!-- WhatsApp Options -->
+        <div class="whatsapp-options">
+            <h3>Send via WhatsApp:</h3>
+            <button type="button" class="btn btn-whatsapp" onclick="sendWhatsAppImage()">📷 Send as Image</button>
+            <button type="button" class="btn btn-whatsapp" onclick="sendWhatsAppPDF()">📄 Send as PDF</button>
+            <button type="button" class="btn btn-whatsapp" onclick="sendWhatsAppText()">📝 Send as Text</button>
         </div>
     </div>
 
     <script>
+        // Initialize with one item row
+        window.onload = function() {
+            addItem();
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('invoiceDate').value = today;
+        };
+        
         // Add item to the table
         function addItem() {
             const table = document.getElementById('itemsTable');
@@ -385,8 +457,8 @@
             newRow.innerHTML = `
                 <td><input type="text" class="item-desc" placeholder="Item description"></td>
                 <td><input type="text" class="item-hsn" placeholder="HSN Code"></td>
-                <td><input type="number" class="item-qty" placeholder="Qty" min="1"></td>
-                <td><input type="number" class="item-rate" placeholder="Rate" min="0" step="0.01"></td>
+                <td><input type="number" class="item-qty" placeholder="Qty" min="1" value="1"></td>
+                <td><input type="number" class="item-rate" placeholder="Rate" min="0" step="0.01" value="0"></td>
                 <td><button type="button" class="btn-remove" onclick="removeItem(this)">Remove</button></td>
             `;
             
@@ -399,6 +471,16 @@
             if (document.querySelectorAll('#itemsTable tr').length > 1) {
                 row.parentNode.removeChild(row);
             }
+        }
+        
+        // Show loading
+        function showLoading() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+        
+        // Hide loading
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
         }
         
         // Generate the bill
@@ -435,7 +517,7 @@
             const sgstAmount = (totalAmount * sgst) / 100;
             const grandTotal = totalAmount + cgstAmount + sgstAmount;
             
-            // Format number to words (simplified)
+            // Format number to words
             function numberToWords(num) {
                 const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
                 const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
@@ -444,11 +526,11 @@
                 if (num === 0) return 'Zero';
                 if (num < 10) return ones[num];
                 if (num < 20) return teens[num - 10];
-                if (num < 100) return tens[Math.floor(num / 10)] + ' ' + ones[num % 10];
-                if (num < 1000) return ones[Math.floor(num / 100)] + ' Hundred ' + numberToWords(num % 100);
-                if (num < 100000) return numberToWords(Math.floor(num / 1000)) + ' Thousand ' + numberToWords(num % 1000);
-                if (num < 10000000) return numberToWords(Math.floor(num / 100000)) + ' Lakh ' + numberToWords(num % 100000);
-                return numberToWords(Math.floor(num / 10000000)) + ' Crore ' + numberToWords(num % 10000000);
+                if (num < 100) return tens[Math.floor(num / 10)] + (num % 10 !== 0 ? ' ' + ones[num % 10] : '');
+                if (num < 1000) return ones[Math.floor(num / 100)] + ' Hundred' + (num % 100 !== 0 ? ' ' + numberToWords(num % 100) : '');
+                if (num < 100000) return numberToWords(Math.floor(num / 1000)) + ' Thousand' + (num % 1000 !== 0 ? ' ' + numberToWords(num % 1000) : '');
+                if (num < 10000000) return numberToWords(Math.floor(num / 100000)) + ' Lakh' + (num % 100000 !== 0 ? ' ' + numberToWords(num % 100000) : '');
+                return numberToWords(Math.floor(num / 10000000)) + ' Crore' + (num % 10000000 !== 0 ? ' ' + numberToWords(num % 10000000) : '');
             }
             
             const amountInWords = grandTotal > 0 ? `Rupees ${numberToWords(Math.floor(grandTotal))} Only` : '__________';
@@ -556,7 +638,7 @@
             
             document.getElementById('billOutput').innerHTML = billHtml;
             
-            // Save bill data for WhatsApp
+            // Save bill data for later use
             sessionStorage.setItem('billData', JSON.stringify({
                 invoiceNo,
                 invoiceDate: formattedDate,
@@ -572,6 +654,8 @@
                 grandTotal,
                 amountInWords
             }));
+            
+            alert('Bill generated successfully!');
         }
         
         // Print bill
@@ -585,12 +669,227 @@
             location.reload();
         }
         
-        // Send via WhatsApp
-        function sendWhatsApp() {
+        // Download as PDF
+        async function downloadPDF() {
+            showLoading();
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            
+            // Capture the bill as image
+            const element = document.getElementById('billOutput');
+            
+            try {
+                const canvas = await html2canvas(element, {
+                    scale: 2,
+                    backgroundColor: '#ffebee',
+                    useCORS: true,
+                    logging: false
+                });
+                
+                const imgData = canvas.toDataURL('image/png');
+                const imgWidth = 190; // A4 width in mm
+                const pageHeight = 297; // A4 height in mm
+                const imgHeight = canvas.height * imgWidth / canvas.width;
+                
+                // Add image to PDF
+                doc.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+                
+                // Save PDF
+                const invoiceNo = document.getElementById('invoiceNo').value || 'bill';
+                doc.save(`Bill_${invoiceNo}.pdf`);
+                
+                hideLoading();
+                alert('PDF downloaded successfully!');
+            } catch (error) {
+                hideLoading();
+                alert('Error generating PDF: ' + error.message);
+            }
+        }
+        
+        // Download as Image
+        async function downloadImage() {
+            showLoading();
+            
+            const element = document.getElementById('billOutput');
+            
+            try {
+                const canvas = await html2canvas(element, {
+                    scale: 2,
+                    backgroundColor: '#ffebee',
+                    useCORS: true,
+                    logging: false
+                });
+                
+                // Create download link
+                const link = document.createElement('a');
+                const invoiceNo = document.getElementById('invoiceNo').value || 'bill';
+                link.download = `Bill_${invoiceNo}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                
+                hideLoading();
+                alert('Image downloaded successfully!');
+            } catch (error) {
+                hideLoading();
+                alert('Error generating image: ' + error.message);
+            }
+        }
+        
+        // Send via WhatsApp as Image
+        async function sendWhatsAppImage() {
+            showLoading();
+            
+            const element = document.getElementById('billOutput');
             const billData = JSON.parse(sessionStorage.getItem('billData') || '{}');
             
             if (!billData.invoiceNo || billData.invoiceNo === '__________') {
-                alert('Please generate a bill first');
+                hideLoading();
+                alert('Please generate a bill first!');
+                return;
+            }
+            
+            try {
+                const canvas = await html2canvas(element, {
+                    scale: 2,
+                    backgroundColor: '#ffebee',
+                    useCORS: true,
+                    logging: false
+                });
+                
+                // Convert to data URL
+                const imgData = canvas.toDataURL('image/png');
+                
+                // Create temporary link
+                const link = document.createElement('a');
+                link.download = `Bill_${billData.invoiceNo}.png`;
+                link.href = imgData;
+                
+                // Create blob for WhatsApp
+                canvas.toBlob(async function(blob) {
+                    // Create file object
+                    const file = new File([blob], `Bill_${billData.invoiceNo}.png`, { type: 'image/png' });
+                    
+                    // For WhatsApp Web API (simplified approach)
+                    // Note: This works best on mobile devices
+                    
+                    // Create WhatsApp message
+                    const message = `*BILL - ${billData.invoiceNo}*\n` +
+                                   `Date: ${billData.invoiceDate}\n` +
+                                   `Party: ${billData.partyName}\n` +
+                                   `Total: ₹${billData.grandTotal?.toFixed(2) || '0.00'}\n\n` +
+                                   `Please find your bill attached.`;
+                    
+                    const encodedMessage = encodeURIComponent(message);
+                    
+                    // Instructions for user
+                    hideLoading();
+                    alert('To send via WhatsApp:\n\n' +
+                          '1. First, download the image using "Download Image" button\n' +
+                          '2. Open WhatsApp\n' +
+                          '3. Select the customer\n' +
+                          '4. Attach the downloaded image\n' +
+                          '5. Add the message if needed\n' +
+                          '6. Send\n\n' +
+                          'For mobile: You can share directly if your browser supports sharing.');
+                    
+                    // Alternative: Try Web Share API
+                    if (navigator.share) {
+                        try {
+                            await navigator.share({
+                                files: [file],
+                                title: `Bill ${billData.invoiceNo}`,
+                                text: message
+                            });
+                        } catch (shareError) {
+                            console.log('Web Share cancelled:', shareError);
+                        }
+                    }
+                });
+                
+            } catch (error) {
+                hideLoading();
+                alert('Error: ' + error.message);
+            }
+        }
+        
+        // Send via WhatsApp as PDF
+        async function sendWhatsAppPDF() {
+            showLoading();
+            
+            const element = document.getElementById('billOutput');
+            const billData = JSON.parse(sessionStorage.getItem('billData') || '{}');
+            
+            if (!billData.invoiceNo || billData.invoiceNo === '__________') {
+                hideLoading();
+                alert('Please generate a bill first!');
+                return;
+            }
+            
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+                
+                const canvas = await html2canvas(element, {
+                    scale: 2,
+                    backgroundColor: '#ffebee',
+                    useCORS: true,
+                    logging: false
+                });
+                
+                const imgData = canvas.toDataURL('image/png');
+                const imgWidth = 190;
+                const imgHeight = canvas.height * imgWidth / canvas.width;
+                
+                doc.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+                
+                // Generate PDF blob
+                const pdfBlob = doc.output('blob');
+                const pdfFile = new File([pdfBlob], `Bill_${billData.invoiceNo}.pdf`, { type: 'application/pdf' });
+                
+                // Create message
+                const message = `*BILL - ${billData.invoiceNo}*\n` +
+                               `Date: ${billData.invoiceDate}\n` +
+                               `Party: ${billData.partyName}\n` +
+                               `Total: ₹${billData.grandTotal?.toFixed(2) || '0.00'}\n\n` +
+                               `Please find your bill attached.`;
+                
+                hideLoading();
+                
+                alert('To send PDF via WhatsApp:\n\n' +
+                      '1. First, download the PDF using "Download PDF" button\n' +
+                      '2. Open WhatsApp\n' +
+                      '3. Select the customer\n' +
+                      '4. Attach the downloaded PDF\n' +
+                      '5. Add the message if needed\n' +
+                      '6. Send\n\n' +
+                      'PDF is better for printing and record keeping.');
+                
+                // Try Web Share API
+                if (navigator.share) {
+                    try {
+                        await navigator.share({
+                            files: [pdfFile],
+                            title: `Bill ${billData.invoiceNo}`,
+                            text: message
+                        });
+                    } catch (shareError) {
+                        console.log('Web Share cancelled:', shareError);
+                    }
+                }
+                
+            } catch (error) {
+                hideLoading();
+                alert('Error: ' + error.message);
+            }
+        }
+        
+        // Send via WhatsApp as Text (original method)
+        function sendWhatsAppText() {
+            const billData = JSON.parse(sessionStorage.getItem('billData') || '{}');
+            
+            if (!billData.invoiceNo || billData.invoiceNo === '__________') {
+                alert('Please generate a bill first!');
                 return;
             }
             
@@ -626,8 +925,7 @@
             // Open WhatsApp
             window.open(whatsappUrl, '_blank');
             
-            // Also show alert with instructions
-            alert('WhatsApp will open with the bill details. You can review and send it to your customer.');
+            alert('WhatsApp will open with bill details in text format.');
         }
         
         // Clear form
@@ -640,7 +938,7 @@
             document.getElementById('cgst').value = '9';
             document.getElementById('sgst').value = '9';
             
-            // Clear items table (keep one row)
+            // Clear items table
             const itemsTable = document.getElementById('itemsTable');
             itemsTable.innerHTML = '';
             addItem(); // Add one empty row
@@ -650,17 +948,12 @@
             
             sessionStorage.removeItem('billData');
             
-            alert('Form cleared!');
-        }
-        
-        // Initialize with one item row
-        window.onload = function() {
-            addItem();
-            
-            // Set today's date as default
+            // Set today's date
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('invoiceDate').value = today;
-        };
+            
+            alert('Form cleared!');
+        }
     </script>
 </body>
 </html>
