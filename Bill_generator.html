@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAA SHAKTI TRADING CO. - Bill Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Times New Roman', serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background-color: #e91e63;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 20px;
+            gap: 30px;
+        }
+        
+        .form-section {
+            flex: 1;
+            min-width: 300px;
+            background-color: #f9f9f9;
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        
+        .bill-preview {
+            flex: 1;
+            min-width: 300px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .items-table th {
+            background-color: #e91e63;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        .items-table td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: #25D366;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1da851;
+        }
+        
+        .btn-secondary {
+            background-color: #e91e63;
+            color: white;
+            margin-left: 10px;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #c2185b;
+        }
+        
+        .btn-add {
+            background-color: #2196F3;
+            color: white;
+            padding: 8px 16px;
+            margin-top: 10px;
+        }
+        
+        .btn-remove {
+            background-color: #f44336;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+        }
+        
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-top: 1px solid #ddd;
+        }
+        
+        /* Bill Styling (Matches the pink bill image) */
+        #billOutput {
+            background-color: #ffebee; /* Light pink background */
+            padding: 30px;
+            border: 1px solid #e91e63;
+            min-height: 800px;
+            position: relative;
+            color: #000;
+            font-family: 'Times New Roman', serif;
+            line-height: 1.4;
+        }
+        
+        .bill-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .bill-header h2 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #000;
+        }
+        
+        .bill-header .gstin {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .company-info {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .company-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .company-address {
+            font-size: 18px;
+        }
+        
+        .invoice-details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #000;
+        }
+        
+        .invoice-no, .invoice-date {
+            font-size: 18px;
+        }
+        
+        .party-details {
+            margin-bottom: 25px;
+        }
+        
+        .party-details div {
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
+        
+        .bill-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+        }
+        
+        .bill-table th {
+            border: 2px solid #000;
+            padding: 12px 8px;
+            text-align: center;
+            font-size: 18px;
+            background-color: #ffcdd2;
+        }
+        
+        .bill-table td {
+            border: 2px solid #000;
+            padding: 12px 8px;
+            text-align: center;
+            font-size: 18px;
+            height: 50px;
+        }
+        
+        .total-section {
+            margin-bottom: 25px;
+            font-size: 18px;
+        }
+        
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .amount-words {
+            margin-bottom: 25px;
+            font-size: 18px;
+            padding-top: 10px;
+            border-top: 2px solid #000;
+        }
+        
+        .signatory {
+            text-align: right;
+            margin-top: 40px;
+            font-size: 18px;
+        }
+        
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #billOutput, #billOutput * {
+                visibility: visible;
+            }
+            #billOutput {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>MAA SHAKTI TRADING CO.</h1>
+            <p>Bill Generator - Create & Send Bills via WhatsApp</p>
+        </header>
+        
+        <div class="main-content">
+            <!-- Form Section -->
+            <section class="form-section">
+                <h2>Fill Bill Details</h2>
+                
+                <div class="form-group">
+                    <label for="invoiceNo">Invoice No.</label>
+                    <input type="text" id="invoiceNo" placeholder="Enter invoice number">
+                </div>
+                
+                <div class="form-group">
+                    <label for="invoiceDate">Date</label>
+                    <input type="date" id="invoiceDate">
+                </div>
+                
+                <div class="form-group">
+                    <label for="partyName">Party Name</label>
+                    <input type="text" id="partyName" placeholder="Enter party name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="partyAddress">Address</label>
+                    <textarea id="partyAddress" placeholder="Enter party address"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="gstNo">GST No/UIN</label>
+                    <input type="text" id="gstNo" placeholder="Enter GST number">
+                </div>
+                
+                <h3>Item Details</h3>
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th>HSN Code</th>
+                            <th>Qty/Packet</th>
+                            <th>Rate (₹)</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="itemsTable">
+                        <!-- Items will be added here dynamically -->
+                        <tr>
+                            <td><input type="text" class="item-desc" placeholder="Item description"></td>
+                            <td><input type="text" class="item-hsn" placeholder="HSN Code"></td>
+                            <td><input type="number" class="item-qty" placeholder="Qty" min="1"></td>
+                            <td><input type="number" class="item-rate" placeholder="Rate" min="0" step="0.01"></td>
+                            <td><button type="button" class="btn-remove" onclick="removeItem(this)">Remove</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <button type="button" class="btn btn-add" onclick="addItem()">+ Add Item</button>
+                
+                <div class="form-group">
+                    <label for="cgst">CGST %</label>
+                    <input type="number" id="cgst" value="9" min="0" max="100" step="0.01">
+                </div>
+                
+                <div class="form-group">
+                    <label for="sgst">SGST %</label>
+                    <input type="number" id="sgst" value="9" min="0" max="100" step="0.01">
+                </div>
+            </section>
+            
+            <!-- Bill Preview Section -->
+            <section class="bill-preview">
+                <h2>Bill Preview</h2>
+                <div id="billOutput">
+                    <!-- Bill will be generated here -->
+                </div>
+            </section>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="actions">
+            <button type="button" class="btn btn-primary" onclick="generateBill()">Generate Bill</button>
+            <button type="button" class="btn btn-secondary" onclick="printBill()">Print Bill</button>
+            <button type="button" class="btn btn-primary" onclick="sendWhatsApp()">Send via WhatsApp</button>
+            <button type="button" class="btn btn-secondary" onclick="clearForm()">Clear Form</button>
+        </div>
+    </div>
+
+    <script>
+        // Add item to the table
+        function addItem() {
+            const table = document.getElementById('itemsTable');
+            const newRow = document.createElement('tr');
+            
+            newRow.innerHTML = `
+                <td><input type="text" class="item-desc" placeholder="Item description"></td>
+                <td><input type="text" class="item-hsn" placeholder="HSN Code"></td>
+                <td><input type="number" class="item-qty" placeholder="Qty" min="1"></td>
+                <td><input type="number" class="item-rate" placeholder="Rate" min="0" step="0.01"></td>
+                <td><button type="button" class="btn-remove" onclick="removeItem(this)">Remove</button></td>
+            `;
+            
+            table.appendChild(newRow);
+        }
+        
+        // Remove item from table
+        function removeItem(button) {
+            const row = button.parentNode.parentNode;
+            if (document.querySelectorAll('#itemsTable tr').length > 1) {
+                row.parentNode.removeChild(row);
+            }
+        }
+        
+        // Generate the bill
+        function generateBill() {
+            // Get form values
+            const invoiceNo = document.getElementById('invoiceNo').value || '__________';
+            const invoiceDate = document.getElementById('invoiceDate').value;
+            const formattedDate = invoiceDate ? new Date(invoiceDate).toLocaleDateString('en-GB') : '__________';
+            const partyName = document.getElementById('partyName').value || '__________';
+            const partyAddress = document.getElementById('partyAddress').value || '__________';
+            const gstNo = document.getElementById('gstNo').value || '__________';
+            const cgst = parseFloat(document.getElementById('cgst').value) || 0;
+            const sgst = parseFloat(document.getElementById('sgst').value) || 0;
+            
+            // Get items
+            const items = [];
+            let totalAmount = 0;
+            
+            document.querySelectorAll('#itemsTable tr').forEach(row => {
+                const desc = row.querySelector('.item-desc').value;
+                const hsn = row.querySelector('.item-hsn').value;
+                const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
+                const rate = parseFloat(row.querySelector('.item-rate').value) || 0;
+                const amount = qty * rate;
+                
+                if (desc && qty > 0 && rate > 0) {
+                    items.push({ desc, hsn, qty, rate, amount });
+                    totalAmount += amount;
+                }
+            });
+            
+            // Calculate taxes
+            const cgstAmount = (totalAmount * cgst) / 100;
+            const sgstAmount = (totalAmount * sgst) / 100;
+            const grandTotal = totalAmount + cgstAmount + sgstAmount;
+            
+            // Format number to words (simplified)
+            function numberToWords(num) {
+                const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+                const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+                const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+                
+                if (num === 0) return 'Zero';
+                if (num < 10) return ones[num];
+                if (num < 20) return teens[num - 10];
+                if (num < 100) return tens[Math.floor(num / 10)] + ' ' + ones[num % 10];
+                if (num < 1000) return ones[Math.floor(num / 100)] + ' Hundred ' + numberToWords(num % 100);
+                if (num < 100000) return numberToWords(Math.floor(num / 1000)) + ' Thousand ' + numberToWords(num % 1000);
+                if (num < 10000000) return numberToWords(Math.floor(num / 100000)) + ' Lakh ' + numberToWords(num % 100000);
+                return numberToWords(Math.floor(num / 10000000)) + ' Crore ' + numberToWords(num % 10000000);
+            }
+            
+            const amountInWords = grandTotal > 0 ? `Rupees ${numberToWords(Math.floor(grandTotal))} Only` : '__________';
+            
+            // Generate bill HTML
+            let itemsHtml = '';
+            items.forEach((item, index) => {
+                itemsHtml += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${item.desc}</td>
+                        <td>${item.hsn}</td>
+                        <td>${item.qty}</td>
+                        <td>${item.rate.toFixed(2)}</td>
+                        <td>${item.amount.toFixed(2)}</td>
+                        <td></td>
+                    </tr>
+                `;
+            });
+            
+            // Add empty rows if less than 4 items
+            for (let i = items.length; i < 4; i++) {
+                itemsHtml += `
+                    <tr>
+                        <td>${i + 1}</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                `;
+            }
+            
+            const billHtml = `
+                <div class="bill-header">
+                    <div class="gstin">GSTIN: 10BCUPG3772J12F</div>
+                    <h2>TAX INVOICE</h2>
+                </div>
+                
+                <div class="company-info">
+                    <div class="company-name">M/S MAA SHAKTI TRADING CO.</div>
+                    <div class="company-address">Bettiah, W.Champaran, Bihar-845438</div>
+                </div>
+                
+                <div class="invoice-details">
+                    <div class="invoice-no">Invoice No. <strong>${invoiceNo}</strong></div>
+                    <div class="invoice-date">Date: <strong>${formattedDate}</strong></div>
+                </div>
+                
+                <div class="party-details">
+                    <div>Party Name: <strong>${partyName}</strong></div>
+                    <div>Address: <strong>${partyAddress}</strong></div>
+                    <div>GST No/UIN: <strong>${gstNo}</strong></div>
+                    <div>State: Bihar &nbsp;&nbsp;&nbsp;&nbsp; State Code-10</div>
+                </div>
+                
+                <table class="bill-table">
+                    <thead>
+                        <tr>
+                            <th>S1. No.</th>
+                            <th>DESCRIPTION</th>
+                            <th>HSN CODE</th>
+                            <th>Qty/ Packet</th>
+                            <th>Rate</th>
+                            <th>Amount Rs.</th>
+                            <th>P.</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${itemsHtml}
+                    </tbody>
+                </table>
+                
+                <div class="total-section">
+                    <div class="total-row">
+                        <div>TOTAL</div>
+                        <div>₹ ${totalAmount.toFixed(2)}</div>
+                    </div>
+                    <div class="total-row">
+                        <div>CGST @ ${cgst}%</div>
+                        <div>₹ ${cgstAmount.toFixed(2)}</div>
+                    </div>
+                    <div class="total-row">
+                        <div>SGST @ ${sgst}%</div>
+                        <div>₹ ${sgstAmount.toFixed(2)}</div>
+                    </div>
+                    <div class="total-row">
+                        <div><strong>G. TOTAL</strong></div>
+                        <div><strong>₹ ${grandTotal.toFixed(2)}</strong></div>
+                    </div>
+                </div>
+                
+                <div class="amount-words">
+                    <div><strong>RS. IN WORDS:</strong></div>
+                    <div>${amountInWords}</div>
+                </div>
+                
+                <div class="signatory">
+                    <div>For &nbsp;&nbsp; MAA SHAKTI TRADING CO.</div>
+                    <div style="margin-top: 30px;">Authorised Signatory</div>
+                </div>
+            `;
+            
+            document.getElementById('billOutput').innerHTML = billHtml;
+            
+            // Save bill data for WhatsApp
+            sessionStorage.setItem('billData', JSON.stringify({
+                invoiceNo,
+                invoiceDate: formattedDate,
+                partyName,
+                partyAddress,
+                gstNo,
+                items,
+                totalAmount,
+                cgst,
+                sgst,
+                cgstAmount,
+                sgstAmount,
+                grandTotal,
+                amountInWords
+            }));
+        }
+        
+        // Print bill
+        function printBill() {
+            const billContent = document.getElementById('billOutput').innerHTML;
+            const originalContent = document.body.innerHTML;
+            
+            document.body.innerHTML = billContent;
+            window.print();
+            document.body.innerHTML = originalContent;
+            location.reload();
+        }
+        
+        // Send via WhatsApp
+        function sendWhatsApp() {
+            const billData = JSON.parse(sessionStorage.getItem('billData') || '{}');
+            
+            if (!billData.invoiceNo || billData.invoiceNo === '__________') {
+                alert('Please generate a bill first');
+                return;
+            }
+            
+            // Create WhatsApp message
+            let message = `*TAX INVOICE*\n`;
+            message += `*M/S MAA SHAKTI TRADING CO.*\n`;
+            message += `Bettiah, W.Champaran, Bihar-845438\n\n`;
+            message += `*Invoice No:* ${billData.invoiceNo}\n`;
+            message += `*Date:* ${billData.invoiceDate}\n`;
+            message += `*Party Name:* ${billData.partyName}\n`;
+            message += `*Address:* ${billData.partyAddress}\n`;
+            message += `*GST No:* ${billData.gstNo}\n\n`;
+            message += `*Items:*\n`;
+            
+            if (billData.items && billData.items.length > 0) {
+                billData.items.forEach((item, index) => {
+                    message += `${index + 1}. ${item.desc} - Qty: ${item.qty}, Rate: ₹${item.rate.toFixed(2)}, Amount: ₹${item.amount.toFixed(2)}\n`;
+                });
+            }
+            
+            message += `\n*Total:* ₹${billData.totalAmount?.toFixed(2) || '0.00'}\n`;
+            message += `*CGST @${billData.cgst || 0}%:* ₹${billData.cgstAmount?.toFixed(2) || '0.00'}\n`;
+            message += `*SGST @${billData.sgst || 0}%:* ₹${billData.sgstAmount?.toFixed(2) || '0.00'}\n`;
+            message += `*GRAND TOTAL:* ₹${billData.grandTotal?.toFixed(2) || '0.00'}\n\n`;
+            message += `*Amount in Words:* ${billData.amountInWords || ''}\n\n`;
+            message += `Thank you for your business!\n`;
+            message += `MAA SHAKTI TRADING CO.`;
+            
+            // Encode message for WhatsApp URL
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
+            
+            // Open WhatsApp
+            window.open(whatsappUrl, '_blank');
+            
+            // Also show alert with instructions
+            alert('WhatsApp will open with the bill details. You can review and send it to your customer.');
+        }
+        
+        // Clear form
+        function clearForm() {
+            document.getElementById('invoiceNo').value = '';
+            document.getElementById('invoiceDate').value = '';
+            document.getElementById('partyName').value = '';
+            document.getElementById('partyAddress').value = '';
+            document.getElementById('gstNo').value = '';
+            document.getElementById('cgst').value = '9';
+            document.getElementById('sgst').value = '9';
+            
+            // Clear items table (keep one row)
+            const itemsTable = document.getElementById('itemsTable');
+            itemsTable.innerHTML = '';
+            addItem(); // Add one empty row
+            
+            // Clear bill preview
+            document.getElementById('billOutput').innerHTML = '';
+            
+            sessionStorage.removeItem('billData');
+            
+            alert('Form cleared!');
+        }
+        
+        // Initialize with one item row
+        window.onload = function() {
+            addItem();
+            
+            // Set today's date as default
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('invoiceDate').value = today;
+        };
+    </script>
+</body>
+</html>
