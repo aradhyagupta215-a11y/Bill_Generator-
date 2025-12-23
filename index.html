@@ -7,7 +7,6 @@
     <!-- Libraries for PDF/Image generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     
     <style>
         * {
@@ -19,11 +18,11 @@
         
         body {
             background-color: #f5f5f5;
-            padding: 20px;
+            padding: 10px;
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 800px;
             margin: 0 auto;
             background-color: white;
             border-radius: 10px;
@@ -34,27 +33,27 @@
         header {
             background-color: #e91e63;
             color: white;
-            padding: 20px;
+            padding: 15px;
             text-align: center;
         }
         
         h1 {
-            font-size: 28px;
+            font-size: 24px;
             margin-bottom: 10px;
         }
         
         .main-content {
             display: flex;
             flex-wrap: wrap;
-            padding: 20px;
-            gap: 30px;
+            padding: 15px;
+            gap: 20px;
         }
         
         .form-section {
             flex: 1;
             min-width: 300px;
             background-color: #f9f9f9;
-            padding: 25px;
+            padding: 20px;
             border-radius: 8px;
             border: 1px solid #ddd;
         }
@@ -62,60 +61,61 @@
         .bill-preview {
             flex: 1;
             min-width: 300px;
-            padding: 20px;
+            padding: 15px;
             background-color: #fff;
             border-radius: 8px;
             border: 1px solid #ddd;
         }
         
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         
         label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
             font-weight: bold;
             color: #333;
         }
         
         input, select, textarea {
             width: 100%;
-            padding: 10px;
+            padding: 8px;
             border: 1px solid #ccc;
             border-radius: 4px;
-            font-size: 16px;
+            font-size: 14px;
         }
         
         textarea {
-            min-height: 80px;
+            min-height: 60px;
             resize: vertical;
         }
         
         .items-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: 15px;
         }
         
         .items-table th {
             background-color: #e91e63;
             color: white;
-            padding: 12px;
+            padding: 8px;
             text-align: left;
+            font-size: 12px;
         }
         
         .items-table td {
-            padding: 10px;
+            padding: 8px;
             border-bottom: 1px solid #ddd;
         }
         
         .btn {
-            padding: 12px 24px;
+            padding: 10px 20px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: bold;
             transition: all 0.3s;
             margin: 5px;
@@ -151,34 +151,37 @@
         .btn-add {
             background-color: #2196F3;
             color: white;
-            padding: 8px 16px;
+            padding: 6px 12px;
             margin-top: 10px;
+            font-size: 12px;
         }
         
         .btn-remove {
             background-color: #f44336;
             color: white;
-            padding: 5px 10px;
+            padding: 4px 8px;
             border-radius: 3px;
+            font-size: 11px;
         }
         
         .actions {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 15px;
-            margin-top: 30px;
-            padding: 20px;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 15px;
             background-color: #f9f9f9;
             border-top: 1px solid #ddd;
         }
         
         .whatsapp-options {
             display: flex;
+            flex-wrap: wrap;
             justify-content: center;
-            gap: 15px;
+            gap: 10px;
             margin-top: 15px;
-            padding: 15px;
+            padding: 10px;
             background-color: #f0f9ff;
             border-radius: 8px;
         }
@@ -186,112 +189,123 @@
         /* Bill Styling (Matches the pink bill image) */
         #billOutput {
             background-color: #ffebee; /* Light pink background */
-            padding: 30px;
+            padding: 20px;
             border: 1px solid #e91e63;
-            min-height: 800px;
-            position: relative;
             color: #000;
             font-family: 'Times New Roman', serif;
-            line-height: 1.4;
+            line-height: 1.3;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            transform-origin: top left;
+            transform: scale(0.95);
         }
         
         .bill-header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 15px;
         }
         
         .bill-header h2 {
-            font-size: 28px;
-            margin-bottom: 10px;
+            font-size: 22px;
+            margin-bottom: 5px;
             color: #000;
         }
         
         .bill-header .gstin {
-            font-size: 18px;
+            font-size: 14px;
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
         }
         
         .company-info {
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 15px;
         }
         
         .company-name {
-            font-size: 24px;
+            font-size: 18px;
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
         }
         
         .company-address {
-            font-size: 18px;
+            font-size: 14px;
         }
         
         .invoice-details {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 25px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #000;
-        }
-        
-        .invoice-no, .invoice-date {
-            font-size: 18px;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #000;
+            font-size: 14px;
         }
         
         .party-details {
-            margin-bottom: 25px;
+            margin-bottom: 15px;
+            font-size: 14px;
         }
         
         .party-details div {
-            margin-bottom: 8px;
-            font-size: 18px;
+            margin-bottom: 5px;
         }
         
         .bill-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 25px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            table-layout: fixed;
         }
         
         .bill-table th {
-            border: 2px solid #000;
-            padding: 12px 8px;
+            border: 1px solid #000;
+            padding: 6px 4px;
             text-align: center;
-            font-size: 18px;
             background-color: #ffcdd2;
+            word-wrap: break-word;
         }
         
         .bill-table td {
-            border: 2px solid #000;
-            padding: 12px 8px;
+            border: 1px solid #000;
+            padding: 6px 4px;
             text-align: center;
-            font-size: 18px;
-            height: 50px;
+            height: 30px;
+            word-wrap: break-word;
         }
         
+        /* Fixed column widths */
+        .bill-table th:nth-child(1), .bill-table td:nth-child(1) { width: 8%; } /* S.No */
+        .bill-table th:nth-child(2), .bill-table td:nth-child(2) { width: 30%; } /* Description */
+        .bill-table th:nth-child(3), .bill-table td:nth-child(3) { width: 15%; } /* HSN */
+        .bill-table th:nth-child(4), .bill-table td:nth-child(4) { width: 15%; } /* Qty */
+        .bill-table th:nth-child(5), .bill-table td:nth-child(5) { width: 15%; } /* Rate */
+        .bill-table th:nth-child(6), .bill-table td:nth-child(6) { width: 15%; } /* Amount */
+        .bill-table th:nth-child(7), .bill-table td:nth-child(7) { width: 2%; } /* P */
+        
         .total-section {
-            margin-bottom: 25px;
-            font-size: 18px;
+            margin-bottom: 15px;
+            font-size: 14px;
         }
         
         .total-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
         }
         
         .amount-words {
-            margin-bottom: 25px;
-            font-size: 18px;
-            padding-top: 10px;
-            border-top: 2px solid #000;
+            margin-bottom: 15px;
+            font-size: 14px;
+            padding-top: 5px;
+            border-top: 1px solid #000;
         }
         
         .signatory {
             text-align: right;
-            margin-top: 40px;
-            font-size: 18px;
+            margin-top: 25px;
+            font-size: 14px;
         }
         
         /* Loading overlay */
@@ -307,17 +321,17 @@
             justify-content: center;
             align-items: center;
             color: white;
-            font-size: 24px;
+            font-size: 20px;
         }
         
         .loading-spinner {
-            border: 8px solid #f3f3f3;
-            border-top: 8px solid #25D366;
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #25D366;
             border-radius: 50%;
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             animation: spin 1s linear infinite;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         
         @keyframes spin {
@@ -325,18 +339,55 @@
             100% { transform: rotate(360deg); }
         }
         
+        /* Print styles */
         @media print {
             body * {
                 visibility: hidden;
+                margin: 0;
+                padding: 0;
             }
+            
             #billOutput, #billOutput * {
                 visibility: visible;
+                margin: 0;
+                padding: 0;
             }
+            
             #billOutput {
                 position: absolute;
-                left: 0;
-                top: 0;
+                left: 10px;
+                top: 10px;
                 width: 100%;
+                max-width: none;
+                transform: scale(1);
+                background-color: #ffebee !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+        }
+        
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            #billOutput {
+                transform: scale(0.85);
+            }
+            
+            .actions, .whatsapp-options {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 300px;
             }
         }
     </style>
@@ -424,7 +475,7 @@
         </div>
         
         <!-- Action Buttons -->
-        <div class="actions">
+        <div class="actions no-print">
             <button type="button" class="btn btn-primary" onclick="generateBill()">Generate Bill</button>
             <button type="button" class="btn btn-secondary" onclick="printBill()">Print Bill</button>
             <button type="button" class="btn btn-secondary" onclick="downloadPDF()">Download PDF</button>
@@ -433,11 +484,10 @@
         </div>
         
         <!-- WhatsApp Options -->
-        <div class="whatsapp-options">
+        <div class="whatsapp-options no-print">
             <h3>Send via WhatsApp:</h3>
             <button type="button" class="btn btn-whatsapp" onclick="sendWhatsAppImage()">📷 Send as Image</button>
             <button type="button" class="btn btn-whatsapp" onclick="sendWhatsAppPDF()">📄 Send as PDF</button>
-            <button type="button" class="btn btn-whatsapp" onclick="sendWhatsAppText()">📝 Send as Text</button>
         </div>
     </div>
 
@@ -526,10 +576,19 @@
                 if (num === 0) return 'Zero';
                 if (num < 10) return ones[num];
                 if (num < 20) return teens[num - 10];
-                if (num < 100) return tens[Math.floor(num / 10)] + (num % 10 !== 0 ? ' ' + ones[num % 10] : '');
-                if (num < 1000) return ones[Math.floor(num / 100)] + ' Hundred' + (num % 100 !== 0 ? ' ' + numberToWords(num % 100) : '');
-                if (num < 100000) return numberToWords(Math.floor(num / 1000)) + ' Thousand' + (num % 1000 !== 0 ? ' ' + numberToWords(num % 1000) : '');
-                if (num < 10000000) return numberToWords(Math.floor(num / 100000)) + ' Lakh' + (num % 100000 !== 0 ? ' ' + numberToWords(num % 100000) : '');
+                if (num < 100) {
+                    if (num % 10 === 0) return tens[Math.floor(num / 10)];
+                    return tens[Math.floor(num / 10)] + ' ' + ones[num % 10];
+                }
+                if (num < 1000) {
+                    return ones[Math.floor(num / 100)] + ' Hundred' + (num % 100 !== 0 ? ' ' + numberToWords(num % 100) : '');
+                }
+                if (num < 100000) {
+                    return numberToWords(Math.floor(num / 1000)) + ' Thousand' + (num % 1000 !== 0 ? ' ' + numberToWords(num % 1000) : '');
+                }
+                if (num < 10000000) {
+                    return numberToWords(Math.floor(num / 100000)) + ' Lakh' + (num % 100000 !== 0 ? ' ' + numberToWords(num % 100000) : '');
+                }
                 return numberToWords(Math.floor(num / 10000000)) + ' Crore' + (num % 10000000 !== 0 ? ' ' + numberToWords(num % 10000000) : '');
             }
             
@@ -632,7 +691,7 @@
                 
                 <div class="signatory">
                     <div>For &nbsp;&nbsp; MAA SHAKTI TRADING CO.</div>
-                    <div style="margin-top: 30px;">Authorised Signatory</div>
+                    <div style="margin-top: 20px;">Authorised Signatory</div>
                 </div>
             `;
             
@@ -661,76 +720,241 @@
         // Print bill
         function printBill() {
             const billContent = document.getElementById('billOutput').innerHTML;
-            const originalContent = document.body.innerHTML;
+            if (!billContent || billContent.trim() === '') {
+                alert('Please generate a bill first!');
+                return;
+            }
             
-            document.body.innerHTML = billContent;
-            window.print();
-            document.body.innerHTML = originalContent;
-            location.reload();
+            const originalContent = document.body.innerHTML;
+            const printWindow = window.open('', '_blank');
+            
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Print Bill</title>
+                    <style>
+                        body {
+                            margin: 0;
+                            padding: 20px;
+                            font-family: 'Times New Roman', serif;
+                            background-color: #ffebee !important;
+                            -webkit-print-color-adjust: exact;
+                            print-color-adjust: exact;
+                        }
+                        @page {
+                            size: A4;
+                            margin: 10mm;
+                        }
+                        .bill-container {
+                            background-color: #ffebee;
+                            padding: 20px;
+                            width: 100%;
+                            max-width: 800px;
+                            margin: 0 auto;
+                        }
+                        table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            font-size: 12px;
+                        }
+                        th, td {
+                            border: 1px solid #000;
+                            padding: 5px;
+                            text-align: center;
+                        }
+                        th {
+                            background-color: #ffcdd2;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="bill-container">
+                        ${billContent}
+                    </div>
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                            window.onafterprint = function() {
+                                window.close();
+                            };
+                        };
+                    <\/script>
+                </body>
+                </html>
+            `);
+            
+            printWindow.document.close();
         }
         
         // Download as PDF
         async function downloadPDF() {
+            const billData = JSON.parse(sessionStorage.getItem('billData') || '{}');
+            if (!billData.invoiceNo || billData.invoiceNo === '__________') {
+                alert('Please generate a bill first!');
+                return;
+            }
+            
             showLoading();
             
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('p', 'mm', 'a4');
             
-            // Capture the bill as image
-            const element = document.getElementById('billOutput');
+            // Set bill content directly in PDF (better control)
+            const margin = 10;
+            let yPos = margin;
             
-            try {
-                const canvas = await html2canvas(element, {
-                    scale: 2,
-                    backgroundColor: '#ffebee',
-                    useCORS: true,
-                    logging: false
+            // Header
+            doc.setFontSize(10);
+            doc.text('GSTIN: 10BCUPG3772J12F', margin, yPos);
+            doc.setFontSize(14);
+            doc.text('TAX INVOICE', 105, yPos, { align: 'center' });
+            yPos += 8;
+            
+            // Company Info
+            doc.setFontSize(12);
+            doc.text('M/S MAA SHAKTI TRADING CO.', 105, yPos, { align: 'center' });
+            yPos += 5;
+            doc.setFontSize(10);
+            doc.text('Bettiah, W.Champaran, Bihar-845438', 105, yPos, { align: 'center' });
+            yPos += 10;
+            
+            // Invoice Details
+            doc.setFontSize(10);
+            doc.text(`Invoice No. ${billData.invoiceNo}`, margin, yPos);
+            doc.text(`Date: ${billData.invoiceDate}`, 150, yPos);
+            yPos += 8;
+            
+            // Party Details
+            doc.text(`Party Name: ${billData.partyName}`, margin, yPos);
+            yPos += 5;
+            doc.text(`Address: ${billData.partyAddress}`, margin, yPos);
+            yPos += 5;
+            doc.text(`GST No/UIN: ${billData.gstNo}`, margin, yPos);
+            yPos += 5;
+            doc.text('State: Bihar    State Code-10', margin, yPos);
+            yPos += 8;
+            
+            // Table Header
+            const tableHeaders = ['S1. No.', 'DESCRIPTION', 'HSN CODE', 'Qty/ Packet', 'Rate', 'Amount Rs.', 'P.'];
+            const colWidths = [10, 60, 25, 25, 25, 30, 5];
+            
+            // Draw table header
+            let xPos = margin;
+            tableHeaders.forEach((header, i) => {
+                doc.rect(xPos, yPos, colWidths[i], 8);
+                doc.text(header, xPos + 2, yPos + 5);
+                xPos += colWidths[i];
+            });
+            yPos += 8;
+            
+            // Table Rows
+            xPos = margin;
+            if (billData.items && billData.items.length > 0) {
+                billData.items.forEach((item, index) => {
+                    doc.rect(xPos, yPos, colWidths[0], 8);
+                    doc.text((index + 1).toString(), xPos + 2, yPos + 5);
+                    
+                    doc.rect(xPos + colWidths[0], yPos, colWidths[1], 8);
+                    doc.text(item.desc, xPos + colWidths[0] + 2, yPos + 5);
+                    
+                    doc.rect(xPos + colWidths[0] + colWidths[1], yPos, colWidths[2], 8);
+                    doc.text(item.hsn, xPos + colWidths[0] + colWidths[1] + 2, yPos + 5);
+                    
+                    doc.rect(xPos + colWidths[0] + colWidths[1] + colWidths[2], yPos, colWidths[3], 8);
+                    doc.text(item.qty.toString(), xPos + colWidths[0] + colWidths[1] + colWidths[2] + 2, yPos + 5);
+                    
+                    doc.rect(xPos + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3], yPos, colWidths[4], 8);
+                    doc.text(item.rate.toFixed(2), xPos + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3] + 2, yPos + 5);
+                    
+                    doc.rect(xPos + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3] + colWidths[4], yPos, colWidths[5], 8);
+                    doc.text(item.amount.toFixed(2), xPos + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3] + colWidths[4] + 2, yPos + 5);
+                    
+                    doc.rect(xPos + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3] + colWidths[4] + colWidths[5], yPos, colWidths[6], 8);
+                    
+                    yPos += 8;
                 });
-                
-                const imgData = canvas.toDataURL('image/png');
-                const imgWidth = 190; // A4 width in mm
-                const pageHeight = 297; // A4 height in mm
-                const imgHeight = canvas.height * imgWidth / canvas.width;
-                
-                // Add image to PDF
-                doc.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
-                
-                // Save PDF
-                const invoiceNo = document.getElementById('invoiceNo').value || 'bill';
-                doc.save(`Bill_${invoiceNo}.pdf`);
-                
-                hideLoading();
-                alert('PDF downloaded successfully!');
-            } catch (error) {
-                hideLoading();
-                alert('Error generating PDF: ' + error.message);
             }
+            
+            // Totals
+            yPos += 5;
+            doc.text(`TOTAL`, 120, yPos);
+            doc.text(`₹ ${billData.totalAmount?.toFixed(2) || '0.00'}`, 170, yPos);
+            yPos += 5;
+            doc.text(`CGST @ ${billData.cgst || 0}%`, 120, yPos);
+            doc.text(`₹ ${billData.cgstAmount?.toFixed(2) || '0.00'}`, 170, yPos);
+            yPos += 5;
+            doc.text(`SGST @ ${billData.sgst || 0}%`, 120, yPos);
+            doc.text(`₹ ${billData.sgstAmount?.toFixed(2) || '0.00'}`, 170, yPos);
+            yPos += 5;
+            doc.setFont(undefined, 'bold');
+            doc.text(`G. TOTAL`, 120, yPos);
+            doc.text(`₹ ${billData.grandTotal?.toFixed(2) || '0.00'}`, 170, yPos);
+            yPos += 10;
+            
+            // Amount in Words
+            doc.setFont(undefined, 'normal');
+            doc.text(`RS. IN WORDS:`, margin, yPos);
+            yPos += 5;
+            doc.text(billData.amountInWords || '', margin, yPos, { maxWidth: 180 });
+            yPos += 15;
+            
+            // Signatory
+            doc.text('For   MAA SHAKTI TRADING CO.', 150, yPos);
+            yPos += 10;
+            doc.text('Authorised Signatory', 150, yPos);
+            
+            // Save PDF
+            doc.save(`Bill_${billData.invoiceNo}.pdf`);
+            
+            hideLoading();
         }
         
         // Download as Image
         async function downloadImage() {
+            const billData = JSON.parse(sessionStorage.getItem('billData') || '{}');
+            if (!billData.invoiceNo || billData.invoiceNo === '__________') {
+                alert('Please generate a bill first!');
+                return;
+            }
+            
             showLoading();
             
             const element = document.getElementById('billOutput');
             
             try {
+                // First, temporarily remove scaling for capture
+                element.style.transform = 'scale(1)';
+                element.style.width = '800px';
+                
                 const canvas = await html2canvas(element, {
                     scale: 2,
                     backgroundColor: '#ffebee',
                     useCORS: true,
-                    logging: false
+                    logging: false,
+                    width: 800,
+                    height: element.scrollHeight,
+                    windowWidth: 800,
+                    windowHeight: element.scrollHeight
                 });
                 
                 // Create download link
                 const link = document.createElement('a');
-                const invoiceNo = document.getElementById('invoiceNo').value || 'bill';
-                link.download = `Bill_${invoiceNo}.png`;
+                link.download = `Bill_${billData.invoiceNo}.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
+                
+                // Restore scaling
+                element.style.transform = 'scale(0.95)';
+                element.style.width = '100%';
                 
                 hideLoading();
                 alert('Image downloaded successfully!');
             } catch (error) {
+                // Restore scaling
+                element.style.transform = 'scale(0.95)';
+                element.style.width = '100%';
+                
                 hideLoading();
                 alert('Error generating image: ' + error.message);
             }
@@ -738,194 +962,46 @@
         
         // Send via WhatsApp as Image
         async function sendWhatsAppImage() {
-            showLoading();
-            
-            const element = document.getElementById('billOutput');
             const billData = JSON.parse(sessionStorage.getItem('billData') || '{}');
-            
             if (!billData.invoiceNo || billData.invoiceNo === '__________') {
-                hideLoading();
                 alert('Please generate a bill first!');
                 return;
             }
             
-            try {
-                const canvas = await html2canvas(element, {
-                    scale: 2,
-                    backgroundColor: '#ffebee',
-                    useCORS: true,
-                    logging: false
-                });
-                
-                // Convert to data URL
-                const imgData = canvas.toDataURL('image/png');
-                
-                // Create temporary link
-                const link = document.createElement('a');
-                link.download = `Bill_${billData.invoiceNo}.png`;
-                link.href = imgData;
-                
-                // Create blob for WhatsApp
-                canvas.toBlob(async function(blob) {
-                    // Create file object
-                    const file = new File([blob], `Bill_${billData.invoiceNo}.png`, { type: 'image/png' });
-                    
-                    // For WhatsApp Web API (simplified approach)
-                    // Note: This works best on mobile devices
-                    
-                    // Create WhatsApp message
-                    const message = `*BILL - ${billData.invoiceNo}*\n` +
-                                   `Date: ${billData.invoiceDate}\n` +
-                                   `Party: ${billData.partyName}\n` +
-                                   `Total: ₹${billData.grandTotal?.toFixed(2) || '0.00'}\n\n` +
-                                   `Please find your bill attached.`;
-                    
-                    const encodedMessage = encodeURIComponent(message);
-                    
-                    // Instructions for user
-                    hideLoading();
-                    alert('To send via WhatsApp:\n\n' +
-                          '1. First, download the image using "Download Image" button\n' +
-                          '2. Open WhatsApp\n' +
-                          '3. Select the customer\n' +
-                          '4. Attach the downloaded image\n' +
-                          '5. Add the message if needed\n' +
-                          '6. Send\n\n' +
-                          'For mobile: You can share directly if your browser supports sharing.');
-                    
-                    // Alternative: Try Web Share API
-                    if (navigator.share) {
-                        try {
-                            await navigator.share({
-                                files: [file],
-                                title: `Bill ${billData.invoiceNo}`,
-                                text: message
-                            });
-                        } catch (shareError) {
-                            console.log('Web Share cancelled:', shareError);
-                        }
-                    }
-                });
-                
-            } catch (error) {
-                hideLoading();
-                alert('Error: ' + error.message);
-            }
+            // First download image
+            await downloadImage();
+            
+            // Then instruct user
+            setTimeout(() => {
+                alert('Image downloaded! Now:\n\n' +
+                      '1. Open WhatsApp\n' +
+                      '2. Select customer\n' +
+                      '3. Attach the downloaded image\n' +
+                      '4. Add message if needed\n' +
+                      '5. Send');
+            }, 1000);
         }
         
         // Send via WhatsApp as PDF
         async function sendWhatsAppPDF() {
-            showLoading();
-            
-            const element = document.getElementById('billOutput');
             const billData = JSON.parse(sessionStorage.getItem('billData') || '{}');
-            
-            if (!billData.invoiceNo || billData.invoiceNo === '__________') {
-                hideLoading();
-                alert('Please generate a bill first!');
-                return;
-            }
-            
-            try {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF('p', 'mm', 'a4');
-                
-                const canvas = await html2canvas(element, {
-                    scale: 2,
-                    backgroundColor: '#ffebee',
-                    useCORS: true,
-                    logging: false
-                });
-                
-                const imgData = canvas.toDataURL('image/png');
-                const imgWidth = 190;
-                const imgHeight = canvas.height * imgWidth / canvas.width;
-                
-                doc.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
-                
-                // Generate PDF blob
-                const pdfBlob = doc.output('blob');
-                const pdfFile = new File([pdfBlob], `Bill_${billData.invoiceNo}.pdf`, { type: 'application/pdf' });
-                
-                // Create message
-                const message = `*BILL - ${billData.invoiceNo}*\n` +
-                               `Date: ${billData.invoiceDate}\n` +
-                               `Party: ${billData.partyName}\n` +
-                               `Total: ₹${billData.grandTotal?.toFixed(2) || '0.00'}\n\n` +
-                               `Please find your bill attached.`;
-                
-                hideLoading();
-                
-                alert('To send PDF via WhatsApp:\n\n' +
-                      '1. First, download the PDF using "Download PDF" button\n' +
-                      '2. Open WhatsApp\n' +
-                      '3. Select the customer\n' +
-                      '4. Attach the downloaded PDF\n' +
-                      '5. Add the message if needed\n' +
-                      '6. Send\n\n' +
-                      'PDF is better for printing and record keeping.');
-                
-                // Try Web Share API
-                if (navigator.share) {
-                    try {
-                        await navigator.share({
-                            files: [pdfFile],
-                            title: `Bill ${billData.invoiceNo}`,
-                            text: message
-                        });
-                    } catch (shareError) {
-                        console.log('Web Share cancelled:', shareError);
-                    }
-                }
-                
-            } catch (error) {
-                hideLoading();
-                alert('Error: ' + error.message);
-            }
-        }
-        
-        // Send via WhatsApp as Text (original method)
-        function sendWhatsAppText() {
-            const billData = JSON.parse(sessionStorage.getItem('billData') || '{}');
-            
             if (!billData.invoiceNo || billData.invoiceNo === '__________') {
                 alert('Please generate a bill first!');
                 return;
             }
             
-            // Create WhatsApp message
-            let message = `*TAX INVOICE*\n`;
-            message += `*M/S MAA SHAKTI TRADING CO.*\n`;
-            message += `Bettiah, W.Champaran, Bihar-845438\n\n`;
-            message += `*Invoice No:* ${billData.invoiceNo}\n`;
-            message += `*Date:* ${billData.invoiceDate}\n`;
-            message += `*Party Name:* ${billData.partyName}\n`;
-            message += `*Address:* ${billData.partyAddress}\n`;
-            message += `*GST No:* ${billData.gstNo}\n\n`;
-            message += `*Items:*\n`;
+            // First download PDF
+            await downloadPDF();
             
-            if (billData.items && billData.items.length > 0) {
-                billData.items.forEach((item, index) => {
-                    message += `${index + 1}. ${item.desc} - Qty: ${item.qty}, Rate: ₹${item.rate.toFixed(2)}, Amount: ₹${item.amount.toFixed(2)}\n`;
-                });
-            }
-            
-            message += `\n*Total:* ₹${billData.totalAmount?.toFixed(2) || '0.00'}\n`;
-            message += `*CGST @${billData.cgst || 0}%:* ₹${billData.cgstAmount?.toFixed(2) || '0.00'}\n`;
-            message += `*SGST @${billData.sgst || 0}%:* ₹${billData.sgstAmount?.toFixed(2) || '0.00'}\n`;
-            message += `*GRAND TOTAL:* ₹${billData.grandTotal?.toFixed(2) || '0.00'}\n\n`;
-            message += `*Amount in Words:* ${billData.amountInWords || ''}\n\n`;
-            message += `Thank you for your business!\n`;
-            message += `MAA SHAKTI TRADING CO.`;
-            
-            // Encode message for WhatsApp URL
-            const encodedMessage = encodeURIComponent(message);
-            const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
-            
-            // Open WhatsApp
-            window.open(whatsappUrl, '_blank');
-            
-            alert('WhatsApp will open with bill details in text format.');
+            // Then instruct user
+            setTimeout(() => {
+                alert('PDF downloaded! Now:\n\n' +
+                      '1. Open WhatsApp\n' +
+                      '2. Select customer\n' +
+                      '3. Attach the downloaded PDF\n' +
+                      '4. Add message if needed\n' +
+                      '5. Send');
+            }, 1000);
         }
         
         // Clear form
