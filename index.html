@@ -9,7 +9,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
     <style>
-        /* ALL PREVIOUS CSS REMAINS THE SAME */
         * {
             margin: 0;
             padding: 0;
@@ -198,6 +197,8 @@
             width: 100%;
             max-width: 800px;
             margin: 0 auto;
+            transform-origin: top left;
+            transform: scale(0.95);
         }
         
         .bill-header {
@@ -338,15 +339,45 @@
             100% { transform: rotate(360deg); }
         }
         
-        /* Hidden print container */
-        #printContainer {
-            display: none;
+        /* Print styles */
+        @media print {
+            body * {
+                visibility: hidden;
+                margin: 0;
+                padding: 0;
+            }
+            
+            #billOutput, #billOutput * {
+                visibility: visible;
+                margin: 0;
+                padding: 0;
+            }
+            
+            #billOutput {
+                position: absolute;
+                left: 10px;
+                top: 10px;
+                width: 100%;
+                max-width: none;
+                transform: scale(1);
+                background-color: #ffebee !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
         }
         
         /* Mobile responsive */
         @media (max-width: 768px) {
             .main-content {
                 flex-direction: column;
+            }
+            
+            #billOutput {
+                transform: scale(0.85);
             }
             
             .actions, .whatsapp-options {
@@ -365,12 +396,9 @@
     <div class="loading-overlay" id="loadingOverlay">
         <div style="text-align: center;">
             <div class="loading-spinner"></div>
-            <div id="loadingText">Processing...</div>
+            <div>Generating PDF/Image...</div>
         </div>
     </div>
-    
-    <!-- Hidden container for printing -->
-    <div id="printContainer"></div>
     
     <div class="container">
         <header>
@@ -447,16 +475,16 @@
         </div>
         
         <!-- Action Buttons -->
-        <div class="actions">
+        <div class="actions no-print">
             <button type="button" class="btn btn-primary" onclick="generateBill()">Generate Bill</button>
-            <button type="button" class="btn btn-secondary" onclick="quickPrint()">Print Bill</button>
+            <button type="button" class="btn btn-secondary" onclick="printBill()">Print Bill</button>
             <button type="button" class="btn btn-secondary" onclick="downloadPDF()">Download PDF</button>
             <button type="button" class="btn btn-secondary" onclick="downloadImage()">Download Image</button>
             <button type="button" class="btn btn-secondary" onclick="clearForm()">Clear Form</button>
         </div>
         
         <!-- WhatsApp Options -->
-        <div class="whatsapp-options">
+        <div class="whatsapp-options no-print">
             <h3>Send via WhatsApp:</h3>
             <button type="button" class="btn btn-whatsapp" onclick="sendWhatsAppImage()">📷 Send as Image</button>
             <button type="button" class="btn btn-whatsapp" onclick="sendWhatsAppPDF()">📄 Send as PDF</button>
@@ -496,8 +524,7 @@
         }
         
         // Show loading
-        function showLoading(message = "Processing...") {
-            document.getElementById('loadingText').textContent = message;
+        function showLoading() {
             document.getElementById('loadingOverlay').style.display = 'flex';
         }
         
@@ -506,7 +533,7 @@
             document.getElementById('loadingOverlay').style.display = 'none';
         }
         
-        // Generate the bill (same as before)
+        // Generate the bill
         function generateBill() {
             // Get form values
             const invoiceNo = document.getElementById('invoiceNo').value || '__________';
@@ -684,228 +711,83 @@
                 cgstAmount,
                 sgstAmount,
                 grandTotal,
-                amountInWords,
-                billHtml // Save HTML too
+                amountInWords
             }));
             
             alert('Bill generated successfully!');
         }
         
-        // FAST PRINT FUNCTION - No preview, direct print
-        function quickPrint() {
-            const billData = JSON.parse(sessionStorage.getItem('billData') || '{}');
-            if (!billData.invoiceNo || billData.invoiceNo === '__________') {
+        // Print bill
+        function printBill() {
+            const billContent = document.getElementById('billOutput').innerHTML;
+            if (!billContent || billContent.trim() === '') {
                 alert('Please generate a bill first!');
                 return;
             }
             
-            showLoading('Preparing for print...');
+            const originalContent = document.body.innerHTML;
+            const printWindow = window.open('', '_blank');
             
-            // Create a simple print-friendly HTML
-            const printHtml = `
+            printWindow.document.write(`
                 <!DOCTYPE html>
                 <html>
                 <head>
-                    <title>Bill ${billData.invoiceNo}</title>
+                    <title>Print Bill</title>
                     <style>
-                        @media print {
-                            @page {
-                                size: A4;
-                                margin: 10mm;
-                            }
-                            body {
-                                margin: 0;
-                                padding: 0;
-                                font-family: 'Times New Roman', serif;
-                            }
-                        }
                         body {
-                            background-color: #ffebee !important;
-                            -webkit-print-color-adjust: exact !important;
-                            print-color-adjust: exact !important;
+                            margin: 0;
                             padding: 20px;
+                            font-family: 'Times New Roman', serif;
+                            background-color: #ffebee !important;
+                            -webkit-print-color-adjust: exact;
+                            print-color-adjust: exact;
+                        }
+                        @page {
+                            size: A4;
+                            margin: 10mm;
                         }
                         .bill-container {
                             background-color: #ffebee;
                             padding: 20px;
-                            border: 1px solid #000;
-                        }
-                        .header {
-                            text-align: center;
-                            margin-bottom: 20px;
-                        }
-                        .gstin {
-                            font-weight: bold;
-                            font-size: 16px;
-                        }
-                        .title {
-                            font-size: 22px;
-                            font-weight: bold;
-                            margin: 10px 0;
-                        }
-                        .company {
-                            font-size: 18px;
-                            font-weight: bold;
-                        }
-                        .address {
-                            font-size: 14px;
-                        }
-                        .invoice-info {
-                            display: flex;
-                            justify-content: space-between;
-                            margin-bottom: 15px;
-                            padding-bottom: 10px;
-                            border-bottom: 1px solid #000;
-                        }
-                        .party-info div {
-                            margin-bottom: 5px;
+                            width: 100%;
+                            max-width: 800px;
+                            margin: 0 auto;
                         }
                         table {
                             width: 100%;
                             border-collapse: collapse;
-                            margin: 15px 0;
+                            font-size: 12px;
                         }
                         th, td {
                             border: 1px solid #000;
-                            padding: 6px;
+                            padding: 5px;
                             text-align: center;
-                            font-size: 12px;
                         }
                         th {
                             background-color: #ffcdd2;
-                        }
-                        .total-row {
-                            display: flex;
-                            justify-content: space-between;
-                            margin-bottom: 5px;
-                        }
-                        .amount-words {
-                            margin-top: 15px;
-                            padding-top: 10px;
-                            border-top: 1px solid #000;
-                        }
-                        .signatory {
-                            text-align: right;
-                            margin-top: 30px;
                         }
                     </style>
                 </head>
                 <body>
                     <div class="bill-container">
-                        <div class="header">
-                            <div class="gstin">GSTIN: 10BCUPG3772J12F</div>
-                            <div class="title">TAX INVOICE</div>
-                            <div class="company">M/S MAA SHAKTI TRADING CO.</div>
-                            <div class="address">Bettiah, W.Champaran, Bihar-845438</div>
-                        </div>
-                        
-                        <div class="invoice-info">
-                            <div>Invoice No. <strong>${billData.invoiceNo}</strong></div>
-                            <div>Date: <strong>${billData.invoiceDate}</strong></div>
-                        </div>
-                        
-                        <div class="party-info">
-                            <div>Party Name: <strong>${billData.partyName}</strong></div>
-                            <div>Address: <strong>${billData.partyAddress}</strong></div>
-                            <div>GST No/UIN: <strong>${billData.gstNo}</strong></div>
-                            <div>State: Bihar &nbsp;&nbsp;&nbsp;&nbsp; State Code-10</div>
-                        </div>
-                        
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>S1. No.</th>
-                                    <th>DESCRIPTION</th>
-                                    <th>HSN CODE</th>
-                                    <th>Qty/ Packet</th>
-                                    <th>Rate</th>
-                                    <th>Amount Rs.</th>
-                                    <th>P.</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${billData.items && billData.items.length > 0 ? 
-                                    billData.items.map((item, index) => `
-                                        <tr>
-                                            <td>${index + 1}</td>
-                                            <td>${item.desc}</td>
-                                            <td>${item.hsn}</td>
-                                            <td>${item.qty}</td>
-                                            <td>${item.rate.toFixed(2)}</td>
-                                            <td>${item.amount.toFixed(2)}</td>
-                                            <td></td>
-                                        </tr>
-                                    `).join('') : 
-                                    '<tr><td colspan="7">No items</td></tr>'
-                                }
-                                <!-- Add empty rows -->
-                                ${Array(Math.max(0, 4 - (billData.items?.length || 0))).fill().map((_, i) => `
-                                    <tr>
-                                        <td>${(billData.items?.length || 0) + i + 1}</td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                        
-                        <div>
-                            <div class="total-row">
-                                <div>TOTAL</div>
-                                <div>₹ ${billData.totalAmount?.toFixed(2) || '0.00'}</div>
-                            </div>
-                            <div class="total-row">
-                                <div>CGST @ ${billData.cgst || 0}%</div>
-                                <div>₹ ${billData.cgstAmount?.toFixed(2) || '0.00'}</div>
-                            </div>
-                            <div class="total-row">
-                                <div>SGST @ ${billData.sgst || 0}%</div>
-                                <div>₹ ${billData.sgstAmount?.toFixed(2) || '0.00'}</div>
-                            </div>
-                            <div class="total-row" style="font-weight: bold;">
-                                <div>G. TOTAL</div>
-                                <div>₹ ${billData.grandTotal?.toFixed(2) || '0.00'}</div>
-                            </div>
-                        </div>
-                        
-                        <div class="amount-words">
-                            <div><strong>RS. IN WORDS:</strong></div>
-                            <div>${billData.amountInWords || ''}</div>
-                        </div>
-                        
-                        <div class="signatory">
-                            <div>For &nbsp;&nbsp; MAA SHAKTI TRADING CO.</div>
-                            <div style="margin-top: 20px;">Authorised Signatory</div>
-                        </div>
+                        ${billContent}
                     </div>
-                    
                     <script>
-                        // Automatically trigger print after 500ms
-                        setTimeout(() => {
+                        window.onload = function() {
                             window.print();
-                            // Close window after print dialog is closed
                             window.onafterprint = function() {
-                                setTimeout(() => window.close(), 500);
+                                window.close();
                             };
-                        }, 500);
+                        };
                     <\/script>
                 </body>
                 </html>
-            `;
+            `);
             
-            // Create a new window and write the print HTML
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(printHtml);
             printWindow.document.close();
-            
-            hideLoading();
         }
         
-        // Download as PDF (optimized)
+        // Download as PDF
         async function downloadPDF() {
             const billData = JSON.parse(sessionStorage.getItem('billData') || '{}');
             if (!billData.invoiceNo || billData.invoiceNo === '__________') {
@@ -913,19 +795,19 @@
                 return;
             }
             
-            showLoading('Generating PDF...');
+            showLoading();
             
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('p', 'mm', 'a4');
             
-            // Simple PDF generation (faster than html2canvas)
-            const margin = 15;
+            // Set bill content directly in PDF (better control)
+            const margin = 10;
             let yPos = margin;
             
             // Header
             doc.setFontSize(10);
             doc.text('GSTIN: 10BCUPG3772J12F', margin, yPos);
-            doc.setFontSize(16);
+            doc.setFontSize(14);
             doc.text('TAX INVOICE', 105, yPos, { align: 'center' });
             yPos += 8;
             
@@ -951,58 +833,60 @@
             doc.text(`GST No/UIN: ${billData.gstNo}`, margin, yPos);
             yPos += 5;
             doc.text('State: Bihar    State Code-10', margin, yPos);
-            yPos += 10;
+            yPos += 8;
             
             // Table Header
-            const headers = [['S.No.', 'DESCRIPTION', 'HSN', 'QTY', 'RATE', 'AMOUNT', 'P']];
-            const colWidths = [10, 60, 20, 20, 25, 30, 5];
+            const tableHeaders = ['S1. No.', 'DESCRIPTION', 'HSN CODE', 'Qty/ Packet', 'Rate', 'Amount Rs.', 'P.'];
+            const colWidths = [10, 60, 25, 25, 25, 30, 5];
             
-            // Add table
-            const tableData = [];
+            // Draw table header
+            let xPos = margin;
+            tableHeaders.forEach((header, i) => {
+                doc.rect(xPos, yPos, colWidths[i], 8);
+                doc.text(header, xPos + 2, yPos + 5);
+                xPos += colWidths[i];
+            });
+            yPos += 8;
+            
+            // Table Rows
+            xPos = margin;
             if (billData.items && billData.items.length > 0) {
                 billData.items.forEach((item, index) => {
-                    tableData.push([
-                        (index + 1).toString(),
-                        item.desc,
-                        item.hsn,
-                        item.qty.toString(),
-                        item.rate.toFixed(2),
-                        item.amount.toFixed(2),
-                        ""
-                    ]);
+                    doc.rect(xPos, yPos, colWidths[0], 8);
+                    doc.text((index + 1).toString(), xPos + 2, yPos + 5);
+                    
+                    doc.rect(xPos + colWidths[0], yPos, colWidths[1], 8);
+                    doc.text(item.desc, xPos + colWidths[0] + 2, yPos + 5);
+                    
+                    doc.rect(xPos + colWidths[0] + colWidths[1], yPos, colWidths[2], 8);
+                    doc.text(item.hsn, xPos + colWidths[0] + colWidths[1] + 2, yPos + 5);
+                    
+                    doc.rect(xPos + colWidths[0] + colWidths[1] + colWidths[2], yPos, colWidths[3], 8);
+                    doc.text(item.qty.toString(), xPos + colWidths[0] + colWidths[1] + colWidths[2] + 2, yPos + 5);
+                    
+                    doc.rect(xPos + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3], yPos, colWidths[4], 8);
+                    doc.text(item.rate.toFixed(2), xPos + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3] + 2, yPos + 5);
+                    
+                    doc.rect(xPos + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3] + colWidths[4], yPos, colWidths[5], 8);
+                    doc.text(item.amount.toFixed(2), xPos + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3] + colWidths[4] + 2, yPos + 5);
+                    
+                    doc.rect(xPos + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3] + colWidths[4] + colWidths[5], yPos, colWidths[6], 8);
+                    
+                    yPos += 8;
                 });
             }
             
-            // Draw table
-            doc.autoTable({
-                head: headers,
-                body: tableData,
-                startY: yPos,
-                theme: 'grid',
-                headStyles: { fillColor: [255, 205, 210] },
-                columnStyles: {
-                    0: { cellWidth: colWidths[0] },
-                    1: { cellWidth: colWidths[1] },
-                    2: { cellWidth: colWidths[2] },
-                    3: { cellWidth: colWidths[3] },
-                    4: { cellWidth: colWidths[4] },
-                    5: { cellWidth: colWidths[5] },
-                    6: { cellWidth: colWidths[6] }
-                }
-            });
-            
-            yPos = doc.lastAutoTable.finalY + 10;
-            
             // Totals
+            yPos += 5;
             doc.text(`TOTAL`, 120, yPos);
             doc.text(`₹ ${billData.totalAmount?.toFixed(2) || '0.00'}`, 170, yPos);
-            yPos += 6;
+            yPos += 5;
             doc.text(`CGST @ ${billData.cgst || 0}%`, 120, yPos);
             doc.text(`₹ ${billData.cgstAmount?.toFixed(2) || '0.00'}`, 170, yPos);
-            yPos += 6;
+            yPos += 5;
             doc.text(`SGST @ ${billData.sgst || 0}%`, 120, yPos);
             doc.text(`₹ ${billData.sgstAmount?.toFixed(2) || '0.00'}`, 170, yPos);
-            yPos += 6;
+            yPos += 5;
             doc.setFont(undefined, 'bold');
             doc.text(`G. TOTAL`, 120, yPos);
             doc.text(`₹ ${billData.grandTotal?.toFixed(2) || '0.00'}`, 170, yPos);
@@ -1011,13 +895,13 @@
             // Amount in Words
             doc.setFont(undefined, 'normal');
             doc.text(`RS. IN WORDS:`, margin, yPos);
-            yPos += 6;
+            yPos += 5;
             doc.text(billData.amountInWords || '', margin, yPos, { maxWidth: 180 });
             yPos += 15;
             
             // Signatory
             doc.text('For   MAA SHAKTI TRADING CO.', 150, yPos);
-            yPos += 8;
+            yPos += 10;
             doc.text('Authorised Signatory', 150, yPos);
             
             // Save PDF
@@ -1026,7 +910,7 @@
             hideLoading();
         }
         
-        // Download as Image (optimized)
+        // Download as Image
         async function downloadImage() {
             const billData = JSON.parse(sessionStorage.getItem('billData') || '{}');
             if (!billData.invoiceNo || billData.invoiceNo === '__________') {
@@ -1034,16 +918,24 @@
                 return;
             }
             
-            showLoading('Generating Image...');
+            showLoading();
             
             const element = document.getElementById('billOutput');
             
             try {
+                // First, temporarily remove scaling for capture
+                element.style.transform = 'scale(1)';
+                element.style.width = '800px';
+                
                 const canvas = await html2canvas(element, {
-                    scale: 1.5,
+                    scale: 2,
                     backgroundColor: '#ffebee',
                     useCORS: true,
-                    logging: false
+                    logging: false,
+                    width: 800,
+                    height: element.scrollHeight,
+                    windowWidth: 800,
+                    windowHeight: element.scrollHeight
                 });
                 
                 // Create download link
@@ -1052,9 +944,17 @@
                 link.href = canvas.toDataURL('image/png');
                 link.click();
                 
+                // Restore scaling
+                element.style.transform = 'scale(0.95)';
+                element.style.width = '100%';
+                
                 hideLoading();
                 alert('Image downloaded successfully!');
             } catch (error) {
+                // Restore scaling
+                element.style.transform = 'scale(0.95)';
+                element.style.width = '100%';
+                
                 hideLoading();
                 alert('Error generating image: ' + error.message);
             }
@@ -1062,47 +962,73 @@
         
         // Send via WhatsApp as Image
         async function sendWhatsAppImage() {
+            const billData = JSON.parse(sessionStorage.getItem('billData') || '{}');
+            if (!billData.invoiceNo || billData.invoiceNo === '__________') {
+                alert('Please generate a bill first!');
+                return;
+            }
+            
+            // First download image
             await downloadImage();
+            
+            // Then instruct user
             setTimeout(() => {
-                alert('Image downloaded! Now open WhatsApp and send the downloaded file.');
-            }, 500);
+                alert('Image downloaded! Now:\n\n' +
+                      '1. Open WhatsApp\n' +
+                      '2. Select customer\n' +
+                      '3. Attach the downloaded image\n' +
+                      '4. Add message if needed\n' +
+                      '5. Send');
+            }, 1000);
         }
         
         // Send via WhatsApp as PDF
         async function sendWhatsAppPDF() {
+            const billData = JSON.parse(sessionStorage.getItem('billData') || '{}');
+            if (!billData.invoiceNo || billData.invoiceNo === '__________') {
+                alert('Please generate a bill first!');
+                return;
+            }
+            
+            // First download PDF
             await downloadPDF();
+            
+            // Then instruct user
             setTimeout(() => {
-                alert('PDF downloaded! Now open WhatsApp and send the downloaded file.');
-            }, 500);
+                alert('PDF downloaded! Now:\n\n' +
+                      '1. Open WhatsApp\n' +
+                      '2. Select customer\n' +
+                      '3. Attach the downloaded PDF\n' +
+                      '4. Add message if needed\n' +
+                      '5. Send');
+            }, 1000);
         }
         
         // Clear form
         function clearForm() {
-            if (confirm('Are you sure you want to clear all data?')) {
-                document.getElementById('invoiceNo').value = '';
-                document.getElementById('invoiceDate').value = '';
-                document.getElementById('partyName').value = '';
-                document.getElementById('partyAddress').value = '';
-                document.getElementById('gstNo').value = '';
-                document.getElementById('cgst').value = '9';
-                document.getElementById('sgst').value = '9';
-                
-                // Clear items table
-                const itemsTable = document.getElementById('itemsTable');
-                itemsTable.innerHTML = '';
-                addItem();
-                
-                // Clear bill preview
-                document.getElementById('billOutput').innerHTML = '';
-                
-                sessionStorage.removeItem('billData');
-                
-                // Set today's date
-                const today = new Date().toISOString().split('T')[0];
-                document.getElementById('invoiceDate').value = today;
-                
-                alert('Form cleared!');
-            }
+            document.getElementById('invoiceNo').value = '';
+            document.getElementById('invoiceDate').value = '';
+            document.getElementById('partyName').value = '';
+            document.getElementById('partyAddress').value = '';
+            document.getElementById('gstNo').value = '';
+            document.getElementById('cgst').value = '9';
+            document.getElementById('sgst').value = '9';
+            
+            // Clear items table
+            const itemsTable = document.getElementById('itemsTable');
+            itemsTable.innerHTML = '';
+            addItem(); // Add one empty row
+            
+            // Clear bill preview
+            document.getElementById('billOutput').innerHTML = '';
+            
+            sessionStorage.removeItem('billData');
+            
+            // Set today's date
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('invoiceDate').value = today;
+            
+            alert('Form cleared!');
         }
     </script>
 </body>
